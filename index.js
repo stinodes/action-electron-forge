@@ -112,11 +112,16 @@ const runAction = () => {
 		run(`npm run ${buildScriptName} --if-present`, pkgRoot);
 	}
 
-	log(`Building${release ? " and releasing" : ""} the Electron app…`);
-	run(
-		`npx electron-forge publish`,
-		appRoot,
-	);
+	try {
+		log(`Building${release ? " and releasing" : ""} the Electron app…`);
+		run(
+			`npx electron-forge publish`,
+			appRoot,
+		);
+	} catch(err) {
+		log(`Failed with an error, probably the "it already exists" one`)
+		log(err.message)
+	}
 };
 
 runAction();
