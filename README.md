@@ -1,18 +1,15 @@
-# Electron Builder Action
+# Electron Forge Action
 
 **GitHub Action for building and releasing Electron apps**
 
-This is a GitHub Action for automatically building and releasing your Electron app using GitHub's CI/CD capabilities. It uses [`electron-builder`](https://github.com/electron-userland/electron-builder) to package your app and release it to a platform like GitHub Releases.
+This is a GitHub Action for automatically building and releasing your Electron app using GitHub's CI/CD capabilities. It uses [`electron-forge](https://github.com/electron-userland/electron-forge) to package your app and release it to a platform like GitHub Releases.
 
 GitHub Actions allows you to build your app on macOS, Windows and Linux without needing direct access to each of these operating systems.
 
 ## Setup
 
-1. **Install and configure `electron-builder`** (v22+) in your Electron app. You can read about this in [the project's docs](https://www.electron.build) or in [my blog post](https://samuelmeuli.com/blog/2019-04-07-packaging-and-publishing-an-electron-app).
-
-2. If you need to compile code (e.g. TypeScript to JavaScript or Sass to CSS), make sure this is done using a **`build` script in your `package.json` file**. The action will execute that script before packaging your app. However, **make sure that the `build` script does _not_ run `electron-builder`**, as this action will do that for you.
-
-3. **Add a workflow file** to your project (e.g. `.github/workflows/build.yml`):
+1. **Install and configure `electron-forge`** (v22+) in your Electron app. You can read about this in [the project's docs](https://www.electronforge.io/)
+1. **Add a workflow file** to your project (e.g. `.github/workflows/build.yml`):
 
    ```yml
    name: Build/release
@@ -29,15 +26,15 @@ GitHub Actions allows you to build your app on macOS, Windows and Linux without 
 
        steps:
          - name: Check out Git repository
-           uses: actions/checkout@v1
+           uses: actions/checkout@v2
 
          - name: Install Node.js, NPM and Yarn
-           uses: actions/setup-node@v1
+           uses: actions/setup-node@v2
            with:
              node-version: 10
 
          - name: Build/release Electron app
-           uses: samuelmeuli/action-electron-builder@v1
+           uses: jsoma/action-electron-forge@v2
            with:
              # GitHub token, automatically provided to the action
              # (No need to define this secret in the repo settings)
@@ -92,7 +89,7 @@ Add the following options to your workflow's existing `action-electron-builder` 
 
 ```yml
 - name: Build/release Electron app
-  uses: samuelmeuli/action-electron-builder@v1
+  uses: jsoma/action-electron-forge@v2
   with:
     # ...
     mac_certs: ${{ secrets.mac_certs }}
@@ -103,7 +100,7 @@ The same goes for **Windows** code signing (`windows_certs` and `windows_certs_p
 
 ### Snapcraft
 
-If you are building/releasing your Linux app for Snapcraft (which is `electron-builder`'s default), you will additionally need to install and sign in to Snapcraft. This can be done using an `action-snapcraft` step before the `action-electron-builder` step:
+If you are building/releasing your Linux app for Snapcraft (which is `electron-forge`'s default), you will additionally need to install and sign in to Snapcraft. This can be done using an `action-snapcraft` step before the `action-electron-forge` step:
 
 ```yml
 - name: Install Snapcraft
@@ -119,7 +116,7 @@ You can read [here](https://github.com/samuelmeuli/action-snapcraft) how you can
 
 ### Notarization
 
-If you've configured `electron-builder` to notarize your Electron Mac app [as described in this guide](https://samuelmeuli.com/blog/2019-12-28-notarizing-your-electron-app), you can use the following steps to let GitHub Actions perform the notarization for you:
+If you've configured `electron-forge` to notarize your Electron Mac app [as described in this guide](https://www.electronjs.org/docs/tutorial/code-signing#signing--notarizing-macos-builds), you can use the following steps to let GitHub Actions perform the notarization for you:
 
 1.  Define the following secrets in your repository's settings on GitHub:
 
@@ -127,22 +124,23 @@ If you've configured `electron-builder` to notarize your Electron Mac app [as de
     - `api_key_id`: Key ID found on App Store Connect
     - `api_key_issuer_id`: Issuer ID found on App Store Connect
 
-2.  In your workflow file, add the following step before your `action-electron-builder` step:
+2.  In your workflow file, add the following step before your `action-electron-forge` step:
 
     ```yml
     - name: Prepare for app notarization
       if: startsWith(matrix.os, 'macos')
+      # TODO: add steps for importing certificates to keychain
       # Import Apple API key for app notarization on macOS
       run: |
         mkdir -p ~/private_keys/
         echo '${{ secrets.api_key }}' > ~/private_keys/AuthKey_${{ secrets.api_key_id }}.p8
     ```
 
-3.  Pass the following environment variables to `action-electron-builder`:
+3.  Pass the following environment variables to `action-electron-forge`:
 
     ```yml
     - name: Build/release Electron app
-      uses: samuelmeuli/action-electron-builder@v1
+      uses: jsoma/action-electron-forge@v2
       with:
         # ...
       env:
@@ -153,14 +151,9 @@ If you've configured `electron-builder` to notarize your Electron Mac app [as de
 
 ## Example
 
-For an example of the action used in production (including app notarization and publishing to Snapcraft), see [Mini Diary](https://github.com/samuelmeuli/mini-diary).
+For an example of the electron-builder version of this action used in production (including app notarization and publishing to Snapcraft), see [Mini Diary](https://github.com/samuelmeuli/mini-diary).
 
 ## Development
 
 Suggestions and contributions are always welcome! Please discuss larger changes via issue before submitting a pull request.
 
-## Related
-
-- [Snapcraft Action](https://github.com/samuelmeuli/action-snapcraft) – GitHub Action for setting up Snapcraft
-- [Lint Action](https://github.com/samuelmeuli/lint-action) – GitHub Action for detecting and fixing linting errors
-- [Maven Publish Action](https://github.com/samuelmeuli/action-maven-publish) – GitHub Action for automatically publishing Maven packages
