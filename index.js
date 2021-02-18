@@ -113,11 +113,20 @@ const runAction = () => {
 	}
 
 	try {
-		log(`Building${release ? " and releasing" : ""} the Electron app…`);
-		run(
-			`npx electron-forge publish`,
-			appRoot,
-		);
+
+		if(release) {
+			log(`Building and releasing the Electron app…`);
+			run(
+				`npx electron-forge publish`,
+				appRoot,
+			);
+		} else {
+			log(`Building the Electron app…`);
+			run(
+				`npx electron-forge make`,
+				appRoot,
+			);
+		}
 	} catch(err) {
 		log(`Failed with an error, probably the "it already exists" one`)
 		log(err.message)
