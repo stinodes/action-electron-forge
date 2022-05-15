@@ -77,9 +77,6 @@ const runAction = () => {
 	const pkgJsonPath = join(pkgRoot, "package.json");
 	const pkgLockPath = join(pkgRoot, "package-lock.json");
 
-	// Determine whether NPM should be used to run commands (instead of Yarn, which is the default)
-	log(`Will run NPM commands in directory "${pkgRoot}"`);
-
 	// Make sure `package.json` file exists
 	if (!existsSync(pkgJsonPath)) {
 		exit(`\`package.json\` file not found at path "${pkgJsonPath}"`);
@@ -101,15 +98,15 @@ const runAction = () => {
 	// Disable console advertisements during install phase
 	setEnv("ADBLOCK", true);
 
-	log(`Installing dependencies using NPM…`);
-	run("npm install", pkgRoot);
+	log(`Installing dependencies`);
+	run("yarn install", pkgRoot);
 
 	// Run NPM build script if it exists
 	if (skipBuild) {
 		log("Skipping build script because `skip_build` option is set");
 	} else {
 		log("Running the build script…");
-		run(`npm run ${buildScriptName} --if-present`, pkgRoot);
+		run(`yarn run ${buildScriptName}`, pkgRoot);
 	}
 
 	try {
